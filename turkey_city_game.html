@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>🗺️ Türkiye'yi Keşfet!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --accent: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Stars background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(1px 1px at 20% 30%, white, transparent),
+      radial-gradient(1px 1px at 80% 10%, white, transparent),
+      radial-gradient(1px 1px at 50% 60%, white, transparent),
+      radial-gradient(1px 1px at 10% 80%, white, transparent),
+      radial-gradient(1px 1px at 90% 70%, white, transparent),
+      radial-gradient(2px 2px at 40% 20%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(2px 2px at 70% 50%, rgba(255,255,255,0.3), transparent);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 16px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--card);
+    border-radius: 20px;
+    margin-bottom: 16px;
+    border: 2px solid rgba(245,158,11,0.3);
+  }
+
+  .logo {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: var(--accent);
+    text-shadow: 0 0 20px rgba(245,158,11,0.5);
+  }
+
+  .stats {
+    display: flex;
+    gap: 16px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .stat span:last-child {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  #score-val { color: var(--accent); }
+  #life-val { color: var(--red); }
+  #streak-val { color: var(--purple); }
+
+  /* QUESTION CARD */
+  .question-card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 2px solid rgba(59,130,246,0.3);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(59,130,246,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .question-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .question-city {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.5rem;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(245,158,11,0.4);
+    margin-bottom: 4px;
+  }
+
+  .question-hint {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* TIMER BAR */
+  .timer-wrap {
+    margin-bottom: 16px;
+  }
+
+  .timer-bar {
+    height: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .timer-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--accent));
+    border-radius: 99px;
+    transition: width 0.1s linear, background 0.5s;
+  }
+
+  .timer-text {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: right;
+    margin-top: 4px;
+  }
+
+  /* MAP */
+  .map-container {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 2px solid rgba(16,185,129,0.2);
+    position: relative;
+  }
+
+  .map-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  #map-svg {
+    width: 100%;
+    height: auto;
+    cursor: pointer;
+    display: block;
+    filter: drop-shadow(0 4px 20px rgba(0,0,0,0.5));
+  }
+
+  .province {
+    fill: #1d4ed8;
+    stroke: #0f172a;
+    stroke-width: 0.5;
+    transition: fill 0.2s;
+    cursor: pointer;
+  }
+
+  .province:hover { fill: #3b82f6; }
+  .province.correct { fill: var(--green) !important; animation: pulse-green 0.5s ease; }
+  .province.wrong { fill: var(--red) !important; animation: shake 0.4s ease; }
+  .province.target { fill: #f59e0b; stroke: white; stroke-width: 1; }
+
+  @keyframes pulse-green {
+    0%,100% { fill: var(--green); }
+    50% { fill: #6ee7b7; }
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+  }
+
+  /* FEEDBACK */
+  .feedback {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: var(--card);
+    border-radius: 24px;
+    padding: 32px 48px;
+    text-align: center;
+    z-index: 100;
+    border: 3px solid var(--green);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+  }
+
+  .feedback.show { transform: translate(-50%, -50%) scale(1); }
+  .feedback.wrong-fb { border-color: var(--red); }
+
+  .feedback-emoji { font-size: 3rem; margin-bottom: 8px; }
+  .feedback-text { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: var(--accent); }
+  .feedback-pts { font-size: 1rem; color: var(--muted); margin-top: 4px; }
+
+  /* PROGRESS */
+  .progress-wrap {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .prog-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: all 0.3s;
+  }
+
+  .prog-dot.done { background: var(--green); }
+  .prog-dot.wrong { background: var(--red); }
+  .prog-dot.active { background: var(--accent); transform: scale(1.4); }
+
+  /* SCREENS */
+  .screen { display: none; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+  .screen.active { display: flex; }
+
+  /* WELCOME SCREEN */
+  .welcome-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 3rem;
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(245,158,11,0.5);
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .welcome-sub {
+    color: var(--muted);
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 32px;
+    max-width: 360px;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 32px;
+  }
+
+  .feature-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .feature-icon { font-size: 2rem; margin-bottom: 8px; }
+  .feature-name { font-weight: 700; font-size: 0.9rem; color: var(--accent); }
+  .feature-desc { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+  /* DIFFICULTY SELECT */
+  .diff-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 24px;
+  }
+
+  .diff-btn {
+    background: var(--card);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 16px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .diff-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .diff-btn.selected { border-color: var(--accent); background: rgba(245,158,11,0.1); }
+  .diff-btn .diff-icon { font-size: 1.8rem; }
+  .diff-btn .diff-name { font-weight: 800; font-size: 0.9rem; margin-top: 4px; }
+  .diff-btn .diff-desc { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+  /* BTN */
+  .btn {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    padding: 14px 40px;
+    border-radius: 99px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #f97316);
+    color: #0f172a;
+    box-shadow: 0 4px 20px rgba(245,158,11,0.4);
+  }
+
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,158,11,0.5); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: var(--card);
+    color: var(--text);
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+
+  /* RESULT SCREEN */
+  .result-emoji { font-size: 5rem; margin-bottom: 16px; }
+
+  .result-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .result-score {
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--text);
+    font-family: 'Fredoka One', cursive;
+  }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    max-width: 360px;
+    margin: 24px 0;
+  }
+
+  .result-stat {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .result-stat .rs-icon { font-size: 1.5rem; }
+  .result-stat .rs-val { font-size: 1.4rem; font-weight: 800; font-family: 'Fredoka One', cursive; color: var(--accent); }
+  .result-stat .rs-lbl { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+  .result-btn-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  /* OVERLAY */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 99;
+    display: none;
+  }
+
+  .overlay.show { display: block; }
+
+  /* CONFETTI */
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    animation: confetti-fall 2s ease-in forwards;
+    z-index: 200;
+    pointer-events: none;
+  }
+
+  @keyframes confetti-fall {
+    0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* MOBILE */
+  @media (max-width: 480px) {
+    .question-city { font-size: 2rem; }
+    .welcome-title { font-size: 2.2rem; }
+    .diff-grid { grid-template-columns: 1fr 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- WELCOME SCREEN -->
+  <div class="screen active" id="welcome-screen">
+    <div style="font-size:4rem;margin-bottom:8px;">🗺️</div>
+    <div class="welcome-title">Türkiye'yi<br>Keşfet!</div>
+    <div class="welcome-sub">Haritada şehirleri bul, puan kazan ve Türkiye'nin her köşesini öğren!</div>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-name">Hızlı Oyun</div>
+        <div class="feature-desc">30 saniye sayaç</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔥</div>
+        <div class="feature-name">Combo</div>
+        <div class="feature-desc">Arka arkaya doğru</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌟</div>
+        <div class="feature-name">81 İl</div>
+        <div class="feature-desc">Tüm şehirler</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <div class="feature-name">Yüksek Skor</div>
+        <div class="feature-desc">Rekorunu kır</div>
+      </div>
+    </div>
+
+    <div style="width:100%;max-width:400px;margin-bottom:16px;">
+      <div style="font-size:0.85rem;color:var(--muted);text-align:center;margin-bottom:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Zorluk Seç</div>
+      <div class="diff-grid">
+        <div class="diff-btn selected" onclick="selectDiff(this,'easy')" data-diff="easy">
+          <div class="diff-icon">😊</div>
+          <div class="diff-name">Kolay</div>
+          <div class="diff-desc">10 soru</div>
+        </div>
+        <div class="diff-btn" onclick="selectDiff(this,'medium')" data-diff="medium">
+          <div class="diff-icon">🤔</div>
+          <div class="diff-name">Orta</div>
+          <div class="diff-desc">15 soru</div>
+        </div>
+        <div class="diff-btn" onclick="selectDiff(this,'hard')" data-diff="hard">
+          <div class="diff-icon">🔥</div>
+          <div class="diff-name">Zor</div>
+          <div class="diff-desc">20 soru</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="startGame()">🚀 OYUNU BAŞLAT</button>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="screen" id="game-screen">
+    <div class="header">
+      <div class="logo">🗺️ Keşfet</div>
+      <div class="stats">
+        <div class="stat"><span>PUAN</span><span id="score-val">0</span></div>
+        <div class="stat"><span>CAN</span><span id="life-val">❤️❤️❤️</span></div>
+        <div class="stat"><span>COMBO</span><span id="streak-val">🔥0</span></div>
+      </div>
+    </div>
+
+    <div class="progress-wrap" id="progress-dots"></div>
+
+    <div class="question-card">
+      <div class="question-label">Bu şehri haritada bul</div>
+      <div class="question-city" id="q-city">İstanbul</div>
+      <div class="question-hint" id="q-hint">Bölge: Marmara</div>
+    </div>
+
+    <div class="timer-wrap">
+      <div class="timer-bar">
+        <div class="timer-fill" id="timer-fill" style="width:100%"></div>
+      </div>
+      <div class="timer-text" id="timer-text">30s</div>
+    </div>
+
+    <div class="map-container">
+      <div class="map-label">🗺️ Haritaya tıkla!</div>
+      <svg id="map-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+        <!-- Simplified Turkey provinces as rectangles/regions for interactivity -->
+      </svg>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div class="screen" id="result-screen">
+    <div class="result-emoji" id="result-emoji">🏆</div>
+    <div class="result-title" id="result-title">Harika Oyun!</div>
+    <div class="result-score" id="result-score">1250</div>
+    <div style="color:var(--muted);font-size:0.9rem;margin-top:4px;">puan</div>
+    
+    <div class="result-grid">
+      <div class="result-stat">
+        <div class="rs-icon">✅</div>
+        <div class="rs-val" id="r-correct">0</div>
+        <div class="rs-lbl">Doğru</div>
+      </div>
+      <div class="result-stat">
+        <div class="rs-icon">❌</div>
+        <div class="rs-val" id="r-wrong">0</div>
+        <div class="rs-lbl">Yanlış</div>
+      </div>
+      <div class="result-stat">
+        <div class="rs-icon">🔥</div>
+        <div class="rs-val" id="r-streak">0</div>
+        <div class="rs-lbl">Max Combo</div>
+      </div>
+    </div>
+
+    <div class="result-btn-row">
+      <button class="btn btn-primary" onclick="restartGame()">🔄 TEKRAR OYNA</button>
+      <button class="btn btn-secondary" onclick="showWelcome()">🏠 Ana Menü</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Feedback popup -->
+<div class="overlay" id="overlay"></div>
+<div class="feedback" id="feedback">
+  <div class="feedback-emoji" id="fb-emoji">✅</div>
+  <div class="feedback-text" id="fb-text">Doğru!</div>
+  <div class="feedback-pts" id="fb-pts">+100 puan</div>
+</div>
+
+<script>
+// ============================================================
+// DATA: Turkey Provinces (il adı, bölge, kolay/orta/zor)
+// ============================================================
+const PROVINCES = [
+  // Marmara
+  {name:"İstanbul", region:"Marmara", x:120, y:80, w:28, h:22, diff:"easy"},
+  {name:"Bursa", region:"Marmara", x:148, y:110, w:32, h:26, diff:"easy"},
+  {name:"Edirne", region:"Marmara", x:60, y:60, w:30, h:30, diff:"medium"},
+  {name:"Kocaeli", region:"Marmara", x:180, y:85, w:24, h:22, diff:"medium"},
+  {name:"Tekirdağ", region:"Marmara", x:85, y:65, w:35, h:25, diff:"medium"},
+  {name:"Çanakkale", region:"Marmara", x:90, y:100, w:36, h:28, diff:"hard"},
+  {name:"Yalova", region:"Marmara", x:162, y:108, w:18, h:16, diff:"hard"},
+  {name:"Sakarya", region:"Marmara", x:205, y:82, w:24, h:22, diff:"hard"},
+  {name:"Bilecik", region:"Marmara", x:190, y:108, w:24, h:22, diff:"hard"},
+  {name:"Balıkesir", region:"Ege", x:110, y:130, w:46, h:38, diff:"medium"},
+
+  // Ege
+  {name:"İzmir", region:"Ege", x:100, y:168, w:38, h:40, diff:"easy"},
+  {name:"Manisa", region:"Ege", x:138, y:155, w:40, h:35, diff:"medium"},
+  {name:"Aydın", region:"Ege", x:118, y:208, w:38, h:30, diff:"medium"},
+  {name:"Denizli", region:"Ege", x:160, y:198, w:38, h:32, diff:"medium"},
+  {name:"Muğla", region:"Ege", x:128, y:238, w:50, h:35, diff:"medium"},
+  {name:"Afyonkarahisar", region:"Ege", x:198, y:160, w:42, h:36, diff:"hard"},
+  {name:"Uşak", region:"Ege", x:162, y:168, w:28, h:26, diff:"hard"},
+  {name:"Kütahya", region:"Ege", x:190, y:130, w:36, h:30, diff:"hard"},
+
+  // Akdeniz
+  {name:"Antalya", region:"Akdeniz", x:200, y:240, w:60, h:40, diff:"easy"},
+  {name:"Mersin", region:"Akdeniz", x:320, y:235, w:50, h:35, diff:"easy"},
+  {name:"Adana", region:"Akdeniz", x:370, y:218, w:48, h:32, diff:"easy"},
+  {name:"Burdur", region:"Akdeniz", x:180, y:220, w:32, h:28, diff:"medium"},
+  {name:"Isparta", region:"Akdeniz", x:195, y:210, w:28, h:28, diff:"medium"},
+  {name:"Hatay", region:"Akdeniz", x:418, y:218, w:32, h:40, diff:"medium"},
+  {name:"Osmaniye", region:"Akdeniz", x:400, y:215, w:22, h:26, diff:"hard"},
+  {name:"Kahramanmaraş", region:"Akdeniz", x:408, y:190, w:40, h:30, diff:"hard"},
+
+  // İç Anadolu
+  {name:"Ankara", region:"İç Anadolu", x:285, y:120, w:52, h:42, diff:"easy"},
+  {name:"Konya", region:"İç Anadolu", x:255, y:180, w:62, h:48, diff:"easy"},
+  {name:"Eskişehir", region:"İç Anadolu", x:222, y:110, w:40, h:32, diff:"medium"},
+  {name:"Kayseri", region:"İç Anadolu", x:360, y:155, w:48, h:38, diff:"medium"},
+  {name:"Kırşehir", region:"İç Anadolu", x:330, y:148, w:32, h:28, diff:"hard"},
+  {name:"Aksaray", region:"İç Anadolu", x:308, y:182, w:32, h:28, diff:"hard"},
+  {name:"Nevşehir", region:"İç Anadolu", x:340, y:178, w:28, h:24, diff:"hard"},
+  {name:"Niğde", region:"İç Anadolu", x:352, y:196, w:28, h:26, diff:"hard"},
+  {name:"Karaman", region:"İç Anadolu", x:320, y:222, w:38, h:30, diff:"hard"},
+  {name:"Çankırı", region:"İç Anadolu", x:300, y:100, w:32, h:28, diff:"hard"},
+  {name:"Kırıkkale", region:"İç Anadolu", x:310, y:118, w:24, h:20, diff:"hard"},
+
+  // Karadeniz
+  {name:"Samsun", region:"Karadeniz", x:342, y:60, w:46, h:30, diff:"easy"},
+  {name:"Trabzon", region:"Karadeniz", x:468, y:50, w:36, h:26, diff:"easy"},
+  {name:"Zonguldak", region:"Karadeniz", x:235, y:72, w:30, h:24, diff:"medium"},
+  {name:"Kastamonu", region:"Karadeniz", x:300, y:72, w:40, h:28, diff:"medium"},
+  {name:"Sinop", region:"Karadeniz", x:328, y:55, w:28, h:22, diff:"medium"},
+  {name:"Ordu", region:"Karadeniz", x:424, y:58, w:30, h:24, diff:"medium"},
+  {name:"Giresun", region:"Karadeniz", x:448, y:52, w:26, h:22, diff:"hard"},
+  {name:"Rize", region:"Karadeniz", x:504, y:46, w:24, h:20, diff:"hard"},
+  {name:"Artvin", region:"Karadeniz", x:528, y:40, w:26, h:22, diff:"hard"},
+  {name:"Bartın", region:"Karadeniz", x:246, y:68, w:22, h:18, diff:"hard"},
+  {name:"Karabük", region:"Karadeniz", x:268, y:80, w:22, h:20, diff:"hard"},
+  {name:"Düzce", region:"Karadeniz", x:218, y:80, w:20, h:18, diff:"hard"},
+  {name:"Bolu", region:"Karadeniz", x:240, y:90, w:32, h:26, diff:"hard"},
+  {name:"Amasya", region:"Karadeniz", x:370, y:78, w:28, h:24, diff:"hard"},
+  {name:"Tokat", region:"Karadeniz", x:390, y:88, w:36, h:28, diff:"hard"},
+
+  // Doğu Anadolu
+  {name:"Erzurum", region:"Doğu Anadolu", x:535, y:90, w:55, h:40, diff:"easy"},
+  {name:"Malatya", region:"Doğu Anadolu", x:445, y:165, w:44, h:34, diff:"medium"},
+  {name:"Elazığ", region:"Doğu Anadolu", x:482, y:160, w:32, h:28, diff:"medium"},
+  {name:"Van", region:"Doğu Anadolu", x:610, y:135, w:50, h:40, diff:"medium"},
+  {name:"Diyarbakır", region:"Güneydoğu Anadolu", x:502, y:190, w:50, h:36, diff:"medium"},
+  {name:"Ağrı", region:"Doğu Anadolu", x:592, y:80, w:45, h:35, diff:"hard"},
+  {name:"Bingöl", region:"Doğu Anadolu", x:512, y:140, w:30, h:26, diff:"hard"},
+  {name:"Bitlis", region:"Doğu Anadolu", x:572, y:145, w:34, h:28, diff:"hard"},
+  {name:"Hakkari", region:"Doğu Anadolu", x:618, y:175, w:36, h:35, diff:"hard"},
+  {name:"Iğdır", region:"Doğu Anadolu", x:640, y:72, w:28, h:22, diff:"hard"},
+  {name:"Kars", region:"Doğu Anadolu", x:610, y:56, w:36, h:30, diff:"hard"},
+  {name:"Ardahan", region:"Doğu Anadolu", x:572, y:42, w:28, h:22, diff:"hard"},
+
+  // Güneydoğu Anadolu  
+  {name:"Gaziantep", region:"Güneydoğu Anadolu", x:428, y:225, w:36, h:28, diff:"easy"},
+  {name:"Şanlıurfa", region:"Güneydoğu Anadolu", x:472, y:228, w:54, h:38, diff:"medium"},
+  {name:"Mardin", region:"Güneydoğu Anadolu", x:524, y:222, w:40, h:28, diff:"medium"},
+  {name:"Batman", region:"Güneydoğu Anadolu", x:545, y:200, w:26, h:22, diff:"hard"},
+  {name:"Siirt", region:"Güneydoğu Anadolu", x:565, y:195, w:28, h:24, diff:"hard"},
+  {name:"Şırnak", region:"Güneydoğu Anadolu", x:578, y:215, w:36, h:30, diff:"hard"},
+  {name:"Adıyaman", region:"Güneydoğu Anadolu", x:442, y:198, w:30, h:26, diff:"hard"},
+  {name:"Kilis", region:"Güneydoğu Anadolu", x:420, y:238, w:16, h:14, diff:"hard"},
+];
+
+const REGION_COLORS = {
+  "Marmara": "#1d4ed8",
+  "Ege": "#0891b2",
+  "Akdeniz": "#0d9488",
+  "İç Anadolu": "#7c3aed",
+  "Karadeniz": "#1d4ed8",
+  "Doğu Anadolu": "#92400e",
+  "Güneydoğu Anadolu": "#b45309",
+};
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let state = {
+  difficulty: "easy",
+  questions: [],
+  current: 0,
+  score: 0,
+  lives: 3,
+  streak: 0,
+  maxStreak: 0,
+  correct: 0,
+  wrong: 0,
+  timerInterval: null,
+  timeLeft: 30,
+  answered: false,
+  highScore: parseInt(localStorage.getItem('hs') || '0'),
+};
+
+// ============================================================
+// MAP RENDERING
+// ============================================================
+function buildMap() {
+  const svg = document.getElementById('map-svg');
+  svg.innerHTML = '';
+
+  // Sea background
+  const sea = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  sea.setAttribute("width", "800"); sea.setAttribute("height", "400");
+  sea.setAttribute("fill", "#0c4a6e"); sea.setAttribute("rx", "12");
+  svg.appendChild(sea);
+
+  // Land base
+  const land = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  land.setAttribute("x", "55"); land.setAttribute("y", "38");
+  land.setAttribute("width", "640"); land.setAttribute("height", "240");
+  land.setAttribute("fill", "#1e3a5f"); land.setAttribute("rx", "8");
+  svg.appendChild(land);
+
+  // Provinces
+  PROVINCES.forEach(p => {
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.id = `prov-${p.name.replace(/\s/g,'-')}`;
+
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("x", p.x); rect.setAttribute("y", p.y);
+    rect.setAttribute("width", p.w); rect.setAttribute("height", p.h);
+    rect.setAttribute("rx", "3");
+    rect.setAttribute("fill", REGION_COLORS[p.region] || "#1d4ed8");
+    rect.setAttribute("stroke", "#0a1628"); rect.setAttribute("stroke-width", "0.8");
+    rect.setAttribute("class", "province");
+    rect.setAttribute("data-name", p.name);
+
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", p.x + p.w/2); text.setAttribute("y", p.y + p.h/2 + 3);
+    text.setAttribute("text-anchor", "middle"); text.setAttribute("font-size", "5");
+    text.setAttribute("fill", "rgba(255,255,255,0.7)"); text.setAttribute("font-family", "Nunito");
+    text.setAttribute("pointer-events", "none");
+    text.textContent = p.name.length > 7 ? p.name.slice(0,7)+'…' : p.name;
+
+    g.appendChild(rect);
+    g.appendChild(text);
+    g.addEventListener('click', () => handleProvinceClick(p.name));
+    svg.appendChild(g);
+  });
+
+  // Legend
+  const regions = [...new Set(PROVINCES.map(p=>p.region))];
+  regions.forEach((r, i) => {
+    const rx = 65 + (i % 4) * 110;
+    const ry = 300 + Math.floor(i/4) * 18;
+    const dot = document.createElementNS("http://www.w3.org/2000/svg","rect");
+    dot.setAttribute("x",rx); dot.setAttribute("y",ry); dot.setAttribute("width","10"); dot.setAttribute("height","10");
+    dot.setAttribute("fill", REGION_COLORS[r]||"#555"); dot.setAttribute("rx","2");
+    svg.appendChild(dot);
+    const lt = document.createElementNS("http://www.w3.org/2000/svg","text");
+    lt.setAttribute("x",rx+14); lt.setAttribute("y",ry+8);
+    lt.setAttribute("font-size","8"); lt.setAttribute("fill","rgba(255,255,255,0.6)");
+    lt.setAttribute("font-family","Nunito");
+    lt.textContent = r;
+    svg.appendChild(lt);
+  });
+}
+
+// ============================================================
+// GAME LOGIC
+// ============================================================
+function selectDiff(el, diff) {
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  state.difficulty = diff;
+}
+
+function getQuestions(diff) {
+  let pool;
+  if (diff === 'easy') pool = PROVINCES.filter(p=>p.diff==='easy');
+  else if (diff === 'medium') pool = PROVINCES.filter(p=>p.diff==='easy'||p.diff==='medium');
+  else pool = [...PROVINCES];
+
+  const counts = {easy:10, medium:15, hard:20};
+  const count = counts[diff];
+  const shuffled = [...pool].sort(()=>Math.random()-0.5);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+function startGame() {
+  showScreen('game-screen');
+  buildMap();
+
+  state.questions = getQuestions(state.difficulty);
+  state.current = 0;
+  state.score = 0;
+  state.lives = 3;
+  state.streak = 0;
+  state.maxStreak = 0;
+  state.correct = 0;
+  state.wrong = 0;
+
+  buildProgressDots();
+  loadQuestion();
+  updateHUD();
+}
+
+function buildProgressDots() {
+  const wrap = document.getElementById('progress-dots');
+  wrap.innerHTML = '';
+  state.questions.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'prog-dot' + (i===0?' active':'');
+    d.id = `dot-${i}`;
+    wrap.appendChild(d);
+  });
+}
+
+function loadQuestion() {
+  if (state.current >= state.questions.length) { endGame(); return; }
+  
+  state.answered = false;
+  const q = state.questions[state.current];
+  
+  document.getElementById('q-city').textContent = q.name;
+  document.getElementById('q-hint').textContent = `📍 Bölge: ${q.region}`;
+  
+  // Reset provinces
+  document.querySelectorAll('.province').forEach(p => {
+    p.classList.remove('correct','wrong','target');
+  });
+
+  // Update progress
+  document.querySelectorAll('.prog-dot').forEach((d,i) => {
+    d.classList.toggle('active', i===state.current);
+  });
+
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(state.timerInterval);
+  const timeLimit = state.difficulty==='easy'?30 : state.difficulty==='medium'?22:16;
+  state.timeLeft = timeLimit;
+  
+  const fill = document.getElementById('timer-fill');
+  const txt = document.getElementById('timer-text');
+
+  state.timerInterval = setInterval(() => {
+    state.timeLeft -= 0.1;
+    const pct = (state.timeLeft / timeLimit) * 100;
+    fill.style.width = pct + '%';
+    txt.textContent = Math.ceil(state.timeLeft) + 's';
+
+    if (pct < 33) fill.style.background = 'linear-gradient(90deg,#ef4444,#f97316)';
+    else if (pct < 66) fill.style.background = 'linear-gradient(90deg,#f59e0b,#fbbf24)';
+    else fill.style.background = 'linear-gradient(90deg,#10b981,#34d399)';
+
+    if (state.timeLeft <= 0) {
+      clearInterval(state.timerInterval);
+      if (!state.answered) timeOut();
+    }
+  }, 100);
+}
+
+function handleProvinceClick(name) {
+  if (state.answered) return;
+  const q = state.questions[state.current];
+  const correct = name === q.name;
+  clearInterval(state.timerInterval);
+  state.answered = true;
+
+  if (correct) {
+    state.streak++;
+    state.maxStreak = Math.max(state.maxStreak, state.streak);
+    state.correct++;
+
+    const timeBonus = Math.ceil(state.timeLeft * 3);
+    const streakBonus = state.streak >= 3 ? state.streak * 10 : 0;
+    const pts = 100 + timeBonus + streakBonus;
+    state.score += pts;
+
+    highlightProvince(name, 'correct');
+    showFeedback(true, pts, state.streak);
+    markDot(state.current, 'done');
+    if (state.streak >= 3) confetti();
+  } else {
+    state.streak = 0;
+    state.wrong++;
+    state.lives--;
+    highlightProvince(name, 'wrong');
+    highlightProvince(q.name, 'target');
+    showFeedback(false, 0, 0, q.name);
+    markDot(state.current, 'wrong');
+  }
+
+  updateHUD();
+
+  setTimeout(() => {
+    hideFeedback();
+    if (state.lives <= 0) { endGame(); return; }
+    state.current++;
+    loadQuestion();
+  }, 1500);
+}
+
+function timeOut() {
+  if (state.answered) return;
+  state.answered = true;
+  state.streak = 0;
+  state.wrong++;
+  state.lives--;
+  
+  const q = state.questions[state.current];
+  highlightProvince(q.name, 'target');
+  markDot(state.current, 'wrong');
+  
+  showFeedback(false, 0, 0, q.name, true);
+  updateHUD();
+
+  setTimeout(() => {
+    hideFeedback();
+    if (state.lives <= 0) { endGame(); return; }
+    state.current++;
+    loadQuestion();
+  }, 1600);
+}
+
+function highlightProvince(name, cls) {
+  const id = `prov-${name.replace(/\s/g,'-')}`;
+  const g = document.getElementById(id);
+  if (g) g.querySelector('.province').classList.add(cls);
+}
+
+function markDot(i, cls) {
+  const d = document.getElementById(`dot-${i}`);
+  if (d) { d.classList.remove('active'); d.classList.add(cls); }
+}
+
+function updateHUD() {
+  document.getElementById('score-val').textContent = state.score;
+  const hearts = '❤️'.repeat(Math.max(0,state.lives)) + '🖤'.repeat(Math.max(0,3-state.lives));
+  document.getElementById('life-val').textContent = hearts;
+  document.getElementById('streak-val').textContent = '🔥' + state.streak;
+}
+
+// ============================================================
+// FEEDBACK
+// ============================================================
+function showFeedback(ok, pts, streak, correctName='', timeout=false) {
+  const fb = document.getElementById('feedback');
+  const ov = document.getElementById('overlay');
+
+  if (timeout) {
+    document.getElementById('fb-emoji').textContent = '⏰';
+    document.getElementById('fb-text').textContent = 'Süre Doldu!';
+    document.getElementById('fb-pts').textContent = correctName ? `Doğru cevap: ${correctName}` : '';
+    fb.classList.add('wrong-fb'); fb.classList.remove('');
+  } else if (ok) {
+    const msgs = ['Süper! 🎉','Harika! ⭐','Mükemmel! 🚀','Bravo! 🎊'];
+    document.getElementById('fb-emoji').textContent = streak>=3?'🔥':'✅';
+    document.getElementById('fb-text').textContent = streak>=3 ? `${streak}li Combo! 🔥` : msgs[Math.floor(Math.random()*msgs.length)];
+    document.getElementById('fb-pts').textContent = `+${pts} puan`;
+    fb.classList.remove('wrong-fb');
+  } else {
+    document.getElementById('fb-emoji').textContent = '❌';
+    document.getElementById('fb-text').textContent = 'Yanlış!';
+    document.getElementById('fb-pts').textContent = correctName ? `Doğru cevap: ${correctName}` : '';
+    fb.classList.add('wrong-fb');
+  }
+
+  ov.classList.add('show');
+  fb.classList.add('show');
+}
+
+function hideFeedback() {
+  document.getElementById('feedback').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ============================================================
+// CONFETTI
+// ============================================================
+function confetti() {
+  const colors = ['#f59e0b','#10b981','#3b82f6','#8b5cf6','#ef4444','#ec4899'];
+  for (let i = 0; i < 20; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `
+      left:${Math.random()*100}%;
+      top:-20px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-delay:${Math.random()*0.5}s;
+      animation-duration:${1.5+Math.random()*1}s;
+      transform:rotate(${Math.random()*360}deg);
+    `;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 3000);
+  }
+}
+
+// ============================================================
+// END GAME
+// ============================================================
+function endGame() {
+  clearInterval(state.timerInterval);
+  
+  if (state.score > state.highScore) {
+    state.highScore = state.score;
+    try { localStorage.setItem('hs', state.score); } catch(e){}
+  }
+
+  const pct = state.correct / state.questions.length;
+  let emoji, title;
+  if (pct >= 0.9) { emoji='🏆'; title='Coğrafya Ustası!'; confetti(); confetti(); }
+  else if (pct >= 0.7) { emoji='⭐'; title='Çok İyi!'; }
+  else if (pct >= 0.5) { emoji='👍'; title='Fena Değil!'; }
+  else { emoji='📚'; title='Biraz daha çalış!'; }
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-score').textContent = state.score;
+  document.getElementById('r-correct').textContent = state.correct;
+  document.getElementById('r-wrong').textContent = state.wrong;
+  document.getElementById('r-streak').textContent = state.maxStreak;
+
+  showScreen('result-screen');
+}
+
+function restartGame() { startGame(); }
+function showWelcome() { showScreen('welcome-screen'); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>
